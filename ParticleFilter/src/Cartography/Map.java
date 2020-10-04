@@ -1,17 +1,22 @@
 package Cartography;
 
+import Graphics.Display;
+import Graphics.Drawable;
+import Graphics.Renderer;
+
 /**
  * Class that represents a map of ones and zeros.
+ * 
  * @author Victor Wen, Alec Benton, Aryan Singh
  *
  */
-public class Map {
+public class Map implements Drawable {
 
 	/**
 	 * Width of the map
 	 */
 	private final int WIDTH;
-	
+
 	/**
 	 * Height of the map
 	 */
@@ -22,22 +27,28 @@ public class Map {
 	 */
 	protected int[][] data;
 
+	private final int gridSize = 3;
+	
+	private Map particles;
+
 	/**
 	 * Constructor to create a map object of all zeros.
-	 * @param width The width of the map
+	 * 
+	 * @param width  The width of the map
 	 * @param height The height of the map
 	 */
 	public Map(int width, int height) {
 		this.WIDTH = width;
 		this.HEIGHT = height;
-		//randomizeMap(WIDTH / 10);
+		randomizeMap(WIDTH / 10);
 	}
 
 	/**
 	 * Constructor that creates a map object and fills it with a specified number.
-	 * @param width Width of the map
+	 * 
+	 * @param width  Width of the map
 	 * @param height Height of the map
-	 * @param fill Number that the map is being filled with
+	 * @param fill   Number that the map is being filled with
 	 */
 	public Map(int width, int height, int fill) {
 		this.WIDTH = width;
@@ -52,6 +63,7 @@ public class Map {
 
 	/**
 	 * Copy constructor for a map object.
+	 * 
 	 * @param map Map object that is being copied
 	 */
 	public Map(Map map) {
@@ -67,6 +79,7 @@ public class Map {
 
 	/**
 	 * Takes in the data field variable and creates a copy.
+	 * 
 	 * @param data 2d array being copied
 	 */
 	public Map(int[][] data) {
@@ -77,6 +90,7 @@ public class Map {
 
 	/**
 	 * Creates a random map of ones and zeros
+	 * 
 	 * @param paths Number of times the loop runs
 	 */
 	public void randomizeMap(int paths) {
@@ -133,18 +147,73 @@ public class Map {
 			System.out.println();
 		}
 	}
+	
+	public void setParticles(Map particles) {
+		this.particles = particles;
+	}
+
+	public Renderer draw() {
+		Display d = new Display(WIDTH * gridSize, HEIGHT * gridSize);
+		Renderer r = new Renderer(d, 24);
+		draw(r);
+		return r;
+	}
+
+	@Override
+	public void draw(Renderer r) {
+		Display disp = r.getDisplay();
+		int[] rendPixels = disp.getPixels();
+		int rendWidth = disp.getImage().getWidth();
+		// int rendHeight = disp.getImage().getHeight();
+		
+
+		for (int y = 0; y < HEIGHT; y++) {
+			for (int x = 0; x < WIDTH; x++) {
+				for (int i = 0; i < gridSize; i++) {
+					for (int j = 0; j < gridSize; j++) {
+						//rendPixels[rendWidth * (y * gridSize + i) + x * gridSize + j ] = ;
+						int red = 0;
+						int green = 0;
+						int blue = 0;
+						int fill = 0;
+						if (data[y][x] == -1) {
+							blue = 0xFF;
+						}
+						if (particles != null && particles.getPoint(x, y) > 0) {
+							red = 0xFF;
+							//System.out.println(red);
+						}
+						if (red + green <= 0) {
+							fill = (1 - data[y][x]) * 0x00FFFF;
+						}
+						rendPixels[rendWidth * (y * gridSize + i) + x * gridSize + j ] = mergeColors(red, green, blue) + fill;
+					}
+				}
+			}
+		}
+	}
+	
+	public int mergeColors(int r, int g, int b) {
+		return 0x010000 * r + 0x000100 * g + 0x000001 * b;
+	}
+	
+	public int mergeColors(int rgb, int rgb2) {
+		return (rgb + rgb2) / 2;
+	}
 
 	/**
 	 * Gets a value at a specified point
+	 * 
 	 * @param p Point where the value is being gotten.
 	 * @return Returns the value at that point
 	 */
 	public int getPoint(Point p) {
 		return data[p.getY()][p.getX()];
 	}
-	
+
 	/**
 	 * Gets the value at specified coordinates.
+	 * 
 	 * @param x X coordinate
 	 * @param y Y coordinate
 	 * @return Returns the value at the coordinates
@@ -155,8 +224,9 @@ public class Map {
 
 	/**
 	 * Sets a value at specified coordinates.
-	 * @param x X coordinate
-	 * @param y Y coordinate
+	 * 
+	 * @param x     X coordinate
+	 * @param y     Y coordinate
 	 * @param value Value that is being set
 	 */
 	public void setPoint(int x, int y, int value) {
@@ -165,7 +235,8 @@ public class Map {
 
 	/**
 	 * Sets a value at a specified point
-	 * @param p Point where value is being set
+	 * 
+	 * @param p     Point where value is being set
 	 * @param value Value that is being set
 	 */
 	public void setPoint(Point p, int value) {
@@ -174,6 +245,7 @@ public class Map {
 
 	/**
 	 * Finds whether or not the point exists in the map.
+	 * 
 	 * @param p Point
 	 * @return Returns true if the point exists, false if not
 	 */
@@ -182,7 +254,9 @@ public class Map {
 	}
 
 	/**
-	 * Finds whether or not the point of the specifeid coordinates exists in the map.
+	 * Finds whether or not the point of the specifeid coordinates exists in the
+	 * map.
+	 * 
 	 * @param x X coordinate
 	 * @param y Y coordinate
 	 * @return Returns true if the point exists, false if not
@@ -193,6 +267,7 @@ public class Map {
 
 	/**
 	 * Gets the height of the map.
+	 * 
 	 * @return The height of the map
 	 */
 	public int getHeight() {
@@ -201,6 +276,7 @@ public class Map {
 
 	/**
 	 * Gets the width of the map.
+	 * 
 	 * @return The width of the map
 	 */
 	public int getWidth() {
@@ -259,12 +335,13 @@ public class Map {
 			}
 		}
 
-		//System.out.print(error + " ");
+		// System.out.print(error + " ");
 		return error;
 	}
 
 	/**
 	 * Gets a random open space in the map.
+	 * 
 	 * @param open What counts as open
 	 * @return Returnt
 	 */
@@ -279,6 +356,18 @@ public class Map {
 
 		return new Point(x, y);
 	}
+	
+	public int getGridSize() {
+		return gridSize;
+	}
+	
+//	public void merge(Map fore) {
+//		for (int y = 0; y < fore.HEIGHT; y++) {
+//			for (int x = 0; x < fore.WIDTH; x++) {
+//				data[y][x] = fore.getPoint(x, y);
+//			}
+//		}
+//	}
 
 //	public double[][] filter() {
 //		int k = 2;
